@@ -1,8 +1,14 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { FaRegEye, FaRegEyeSlash } from "react-icons/fa";
-
 import OAuth from "../component/OAuth";
+import {
+  getAuth,
+  createUserWithEmailAndPassword,
+  updateProfile,
+} from "firebase/auth";
+import { db } from "../firebase.config";
+import { serverTimestamp, setDoc, doc } from "firebase/firestore";
 
 export default function SignUp() {
   const [showPassword, setShowPassword] = useState(true);
@@ -21,6 +27,30 @@ export default function SignUp() {
     }));
   };
 
+  async function handleSubmission(e) {
+    e.preventDefault();
+
+    try {
+      const auth = getAuth();
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+      updateProfile(auth.currentUser, {
+        displayName: name,
+      });
+      const user = userCredential.user;
+      const formDataCopy = { ...formData };
+      delete formData.password;
+      formDataCopy.timestamp = serverTimestamp();
+
+      await setDoc(doc(db, "users", user.uid), formDataCopy);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
   const onClickEye = () => {
     setShowPassword((prevState) => !prevState);
   };
@@ -37,7 +67,7 @@ export default function SignUp() {
           />
         </div>
         <div className="w-full md:w-[67%] lg:w-[40%] lg:ml-20">
-          <form>
+          <form onSubmit={handleSubmission}>
             <input
               type="text"
               id="name"
