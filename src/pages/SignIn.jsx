@@ -1,10 +1,11 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { FaRegEye, FaRegEyeSlash } from "react-icons/fa";
-
 import OAuth from "../component/OAuth";
+
 import { signInWithEmailAndPassword, getAuth } from "firebase/auth";
 import { toast } from "react-toastify";
+import KeyImage from "../component/KeyImage";
 
 export default function SignIn() {
   const [showPassword, setShowPassword] = useState(true);
@@ -37,6 +38,7 @@ export default function SignIn() {
         password
       );
       if (userCredential.user) navigate("/");
+      console.log(`${userCredential.user}, ${userCredential.email}`);
     } catch (error) {
       toast.error("Wrong User Credentials");
     }
@@ -46,13 +48,7 @@ export default function SignIn() {
     <section>
       <h1 className="text-3xl text-center mt-6 font-bold">Sign In</h1>
       <div className="flex justify-center flex-wrap items-center px-6 py-12 max-w-6xl mx-auto">
-        <div className="md:w-[67%] lg:w-[50%] lg:h-[70vh] h-[50vh] mb-12 md:mb-6">
-          <img
-            src="https://images.unsplash.com/photo-1605822105816-76b7cfd71142?q=80&w=870&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-            alt="key"
-            className="w-full h-full rounded-2xl"
-          />
-        </div>
+        <KeyImage />
         <div className="w-full md:w-[67%] lg:w-[40%] lg:ml-20">
           <form onSubmit={submissionHandler}>
             <input
