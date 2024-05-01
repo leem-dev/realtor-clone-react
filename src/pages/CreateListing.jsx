@@ -1,7 +1,10 @@
-import { type } from "@testing-library/user-event/dist/type";
 import React, { useState } from "react";
+import Spinner from "../component/Spinner";
+import { toast } from "react-toastify";
 
 export default function CreateListing() {
+  const [geolocationEnabled, setGeolocationEnabled] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     type: "rent",
     name: "",
@@ -14,6 +17,9 @@ export default function CreateListing() {
     offer: false,
     regularPrice: 0,
     discountedPrice: 0,
+    latitude: 0,
+    longitude: 0,
+    images: {},
   });
 
   const {
@@ -28,13 +34,63 @@ export default function CreateListing() {
     offer,
     regularPrice,
     discountedPrice,
+    latitude,
+    longitude,
+    images,
   } = formData;
-  function onChangeHandler() {}
+
+  function onChangeHandler(e) {
+    let boolean = null;
+
+    if (e.target.value === "true") {
+      boolean = true;
+    }
+    if (e.target.value === "false") {
+      boolean = false;
+    }
+
+    // files
+    if (e.target.files) {
+      setFormData((prevState) => ({
+        ...prevState,
+        images: e.target.files,
+      }));
+    }
+
+    // Text/Boolean/Number
+    if (!e.target.files) {
+      setFormData((prevState) => ({
+        ...prevState,
+        [e.target.id]: boolean ?? e.target.value,
+      }));
+    }
+  }
+
+  function onSubmitForm(e) {
+    e.preventDefault();
+    setLoading(true);
+    if (discountedPrice >= regularPrice) {
+      setLoading(false);
+      toast.error("Discounted price needs to be less than regular price");
+      return;
+    }
+    if (images.length > 6) {
+      setLoading(false);
+      toast.error("maximum 6 images are allowed");
+      return;
+    }
+    let geolocation = {};
+    let location;
+  }
+
+  if (loading) {
+    return <Spinner />;
+  }
 
   return (
     <main className="max-w-md px-2 mx-auto">
       <h1 className="text-3xl text-center mt-6 font-bold">Create a Listing</h1>
-      <form>
+      <form onSubmit={onSubmitForm}>
         <p className="text-lg mt-6 font-semibold ">Sell / Rent</p>
         <div className="flex">
           <button
@@ -58,7 +114,7 @@ export default function CreateListing() {
             } `}
             type="button"
             id="type"
-            value="sale"
+            value="rent"
             onClick={onChangeHandler}
           >
             Rent
@@ -94,7 +150,7 @@ export default function CreateListing() {
             <p className="text-lg font-semibold">Baths</p>
             <input
               type="number"
-              id="bedrooms"
+              id="bathrooms"
               value={bathrooms}
               onChange={onChangeHandler}
               min="1"
@@ -164,6 +220,36 @@ export default function CreateListing() {
           required
           className="w-full px-4 py-2 text-xl text-gray-700 bg-white border-gray-300 rounded transition duration-150 ease-in-out focus:text-gray-700 focus:bg-white focus:border-slate-600 mb-6 "
         />
+        {!geolocationEnabled && (
+          <div className="flex space-x-6 justify-start mb-6">
+            <div className="">
+              <p className="text-lg font-semibold ">Latitude</p>
+              <input
+                type="number"
+                id="latitude"
+                value={latitude}
+                onChange={onChangeHandler}
+                required
+                min="-90"
+                max="90"
+                className="w-full px-4 py-2 text-xl text-gray-700 bg-white border border-gray-300 transition duration-150 ease-in-out focus:text-gray-700 focus:bg-white focus:border-slate-600 text-center rounded"
+              />
+            </div>
+            <div className="">
+              <p className="text-lg font-semibold ">Longitude</p>
+              <input
+                type="number"
+                id="longitude"
+                value={longitude}
+                onChange={onChangeHandler}
+                required
+                min="-180"
+                max="180"
+                className="w-full mb-6 px-4 py-2 text-xl text-gray-700 bg-white border border-gray-300 transition duration-150 ease-in-out focus:text-gray-700 focus:bg-white focus:border-slate-600 text-center rounded"
+              />
+            </div>
+          </div>
+        )}
         <p className="text-lg font-semibold ">Description</p>
         <textarea
           type="text"
@@ -182,7 +268,7 @@ export default function CreateListing() {
             } `}
             type="button"
             id="offer"
-            value={true}
+            value={false}
             onClick={onChangeHandler}
           >
             Yes
@@ -193,7 +279,7 @@ export default function CreateListing() {
             } `}
             type="button"
             id="offer"
-            value={false}
+            value={true}
             onClick={onChangeHandler}
           >
             No
@@ -221,7 +307,7 @@ export default function CreateListing() {
             </div>
           </div>
         </div>
-        {offer && (
+        {!offer && (
           <div className="flex items-center mb-6">
             <div>
               <p className="text-lg font-semibold">Discounted Price</p>
