@@ -80,8 +80,26 @@ export default function CreateListing() {
       return;
     }
     let geolocation = {};
-    let location;
+
+    if (geolocationEnabled) {
+      geolocation.lat = latitude;
+      geolocation.lng = longitude;
+    }
+
+    async function storeImage(image) {
+      
+    }
+
+    const imgUrls = await Promise.all(
+      [...images].map((image) => storeImage(image)).catch((error) => {
+        setLoading(false)
+        toast.error("Images not uploaded")
+        return
+      })
+    )
   }
+
+  
 
   if (loading) {
     return <Spinner />;
@@ -264,22 +282,22 @@ export default function CreateListing() {
         <div className="flex mb-6">
           <button
             className={`mr-3 px-7 py-3 font-medium text-sm uppercase shadow-md rounded hover:shadow-lg focus:shadow-lg active:shadow-lg transition duration-150 ease-in-out w-full ${
-              offer ? "bg-white text-black " : "bg-slate-600 text-white "
+              !offer ? "bg-white text-black " : "bg-slate-600 text-white "
             } `}
             type="button"
             id="offer"
-            value={false}
+            value={true}
             onClick={onChangeHandler}
           >
             Yes
           </button>
           <button
             className={`ml-3 px-7 py-3 font-medium text-sm uppercase shadow-md rounded hover:shadow-lg focus:shadow-lg active:shadow-lg transition duration-150 ease-in-out w-full ${
-              !offer ? "bg-white text-black " : "bg-slate-600 text-white "
+              offer ? "bg-white text-black " : "bg-slate-600 text-white "
             } `}
             type="button"
             id="offer"
-            value={true}
+            value={false}
             onClick={onChangeHandler}
           >
             No
@@ -307,7 +325,7 @@ export default function CreateListing() {
             </div>
           </div>
         </div>
-        {!offer && (
+        {offer && (
           <div className="flex items-center mb-6">
             <div>
               <p className="text-lg font-semibold">Discounted Price</p>
