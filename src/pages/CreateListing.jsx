@@ -32,7 +32,7 @@ export default function CreateListing() {
     discountedPrice: 0,
     latitude: 0,
     longitude: 0,
-    images: {},
+    images: [],
   });
 
   const {
@@ -72,10 +72,18 @@ export default function CreateListing() {
 
     // Text/Boolean/Number
     if (!e.target.files) {
-      setFormData((prevState) => ({
-        ...prevState,
-        [e.target.id]: boolean ?? e.target.value,
-      }));
+      // handle latitude and longitude seperately
+      if (e.target.id === "latitude" || e.target.id === "longitude") {
+        setFormData((prevState) => ({
+          ...prevState,
+          [e.target.id]: parseFloat(e.target.value),
+        }));
+      } else {
+        setFormData((prevState) => ({
+          ...prevState,
+          [e.target.id]: boolean ?? e.target.value,
+        }));
+      }
     }
   }
 
@@ -92,11 +100,23 @@ export default function CreateListing() {
       toast.error("maximum 6 images are allowed");
       return;
     }
+    // let geolocation = {};
+
+    // if (geolocationEnabled) {
+    //   geolocation.lat = latitude;
+    //   geolocation.lng = longitude;
+    // }
+
+    const { geolocationEnabled, latitude, longitude } = formData;
     let geolocation = {};
 
     if (geolocationEnabled) {
       geolocation.lat = latitude;
       geolocation.lng = longitude;
+    } else {
+      // Handle case when geolocation is not enabled
+      geolocation.lat = 0;
+      geolocation.lng = 0;
     }
 
     async function storeImage(image) {

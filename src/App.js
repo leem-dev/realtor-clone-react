@@ -10,8 +10,9 @@ import Header from "./component/Header";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import CreateListing from "./pages/CreateListing";
-import EditListing from "./pages/EditListing";
+
 import Listing from "./pages/Listing";
+import EditListing from "./pages/EditPostListing";
 
 function App() {
   return (

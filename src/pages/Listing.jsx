@@ -4,12 +4,8 @@ import { useParams } from "react-router-dom";
 import { db } from "../firebase.config";
 import Spinner from "../component/Spinner";
 import { Swiper, SwiperSlide } from "swiper/react";
-import SwiperCore, {
-  EffectFade,
-  Autoplay,
-  Navigation,
-  Pagination,
-} from "swiper";
+import SwiperCore from "swiper";
+import { EffectFade, Autoplay, Navigation, Pagination } from "swiper/modules";
 
 import "swiper/css/bundle";
 
@@ -22,14 +18,15 @@ export default function Listing() {
     async function fetchListing() {
       const docRef = doc(db, "listings", params.listingId);
       const docSnap = await getDoc(docRef);
-
       if (docSnap.exists()) {
         setListing(docSnap.data());
         setLoading(false);
       }
     }
+    console.log(params.listingId);
+
     fetchListing();
-  }, [params.listingId, listing]);
+  }, [params.listingId]);
 
   if (loading) {
     return <Spinner />;
@@ -47,7 +44,7 @@ export default function Listing() {
         modules={[EffectFade]}
         autoplay={{ delay: 3000 }}
       >
-        {Listing.imgUrls.map((url, index) => (
+        {listing.imgUrls.map((url, index) => (
           <SwiperSlide key={index}>
             <div
               className="w-full overflow-hidden h-300px"
