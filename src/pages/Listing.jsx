@@ -6,13 +6,14 @@ import Spinner from "../component/Spinner";
 import { Swiper, SwiperSlide } from "swiper/react";
 import SwiperCore from "swiper";
 import { EffectFade, Autoplay, Navigation, Pagination } from "swiper/modules";
-
+import { FaShare } from "react-icons/fa";
 import "swiper/css/bundle";
 
 export default function Listing() {
   const params = useParams();
   const [listing, setListing] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [shareLinkCopied, setShareLinkCopied] = useState(false);
 
   useEffect(() => {
     async function fetchListing() {
@@ -23,7 +24,6 @@ export default function Listing() {
         setLoading(false);
       }
     }
-    console.log(params.listingId);
 
     fetchListing();
   }, [params.listingId]);
@@ -47,14 +47,32 @@ export default function Listing() {
         {listing.imgUrls.map((url, index) => (
           <SwiperSlide key={index}>
             <div
-              className="w-full overflow-hidden h-300px"
+              className="relative w-full overflow-hidden h-[500px]"
               style={{
                 background: `url(${listing.imgUrls[index]}) center no-repeat`,
+                backgroundSize: "cover",
               }}
             ></div>
           </SwiperSlide>
         ))}
       </Swiper>
+      <div
+        className="fixed top-[13%] right-[3%] z-10 bg-white cursor-pointer border-2 border-gray-400 rounded-full w-12 h-12 flex justify-center items-center"
+        onClick={() => {
+          navigator.clipboard.writeText(window.location.href);
+          setShareLinkCopied(true);
+          setTimeout(() => {
+            setShareLinkCopied(false);
+          }, 2000);
+        }}
+      >
+        <FaShare className="text-lg text-slate-500" />
+      </div>
+      {shareLinkCopied && (
+        <p className="fixed top-[23%] right-[5%] font-semibold border-2 border-gray-400 rounded-md bg-white z-10 p-2">
+          Link Copied
+        </p>
+      )}
     </main>
   );
 }
