@@ -4,6 +4,7 @@ import {
   limit,
   orderBy,
   query,
+  startAfter,
   where,
 } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
@@ -15,6 +16,7 @@ import ListingItem from "../component/ListingItem";
 export default function Offers() {
   const [listings, setListings] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [lastFetchedListing, setLastFetchedListing] = useState(null);
 
   useEffect(() => {
     async function fetchOfferListings() {
@@ -27,6 +29,8 @@ export default function Offers() {
           limit(8)
         );
         const querySnap = await getDocs(q);
+        const lastVisibleListing = querySnap.docs[querySnap.docs.length - 1];
+        setLastFetchedListing(lastVisibleListing);
         const listings = [];
         querySnap.forEach((doc) => {
           return listings.push({
@@ -42,6 +46,31 @@ export default function Offers() {
     }
     fetchOfferListings();
   }, []);
+
+  async function handleLoadMore() {
+    try {
+      const listingsRef = collection(db, "listings");
+      const q = query(
+        listingsRef,
+        where("offer", "==", true),
+        orderBy("timestamp", "desc"),
+        startAfter(lastFetchedListing),
+        limit(4)
+      );
+      const querySnap = await getDocs(q);
+      const lastVisibleListing = querySnap.docs[querySnap.docs.length - 1];
+      setLastFetchedListing(lastVisibleListing);
+      const listings = [];
+      querySnap.forEach((doc) => {
+        return listings.push({
+          id: doc.id,
+          data: doc.data(),
+        });
+      });
+      setListings((prevState) => [...prevState, listings]);
+      setLoading(false);
+    } catch (error) {}
+  }
 
   return (
     <div className="max-w-6xl mx-auto px-3">
@@ -61,6 +90,16 @@ export default function Offers() {
               ))}
             </ul>
           </main>
+          {lastFetchedListing && (
+            <div className="flex justify-center items-center">
+              <button
+                className="bg-white px-3 py-1.5 text-gray-700 border border-gray-300 mb-6 mt-6 hover:border-slate-600 rounded transition duration-150 ease-in-out"
+                onClick={handleLoadMore}
+              >
+                Load more
+              </button>
+            </div>
+          )}
         </>
       ) : (
         <p>There are no current offers</p>
