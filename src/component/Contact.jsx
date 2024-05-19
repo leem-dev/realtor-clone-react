@@ -11,6 +11,9 @@ export default function Contact({ userRef, listing }) {
     async function getLandlord() {
       const docRef = doc(db, "users", userRef);
       const docSnap = await getDoc(docRef);
+
+      console.log(docSnap.data());
+
       if (docSnap.exists()) {
         setLandlord(docSnap.data());
       } else {
